@@ -1,0 +1,25 @@
+{
+  "name": "only-user-auth-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lajawanti/only-user-auth-server.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lajawanti/only-user-auth-server/issues"
+  },
+  "homepage": "https://github.com/lajawanti/only-user-auth-server#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "knex": "^0.20.7",
+    "morgan": "^1.9.1"
+  }
+}
