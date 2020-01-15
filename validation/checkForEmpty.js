@@ -1,4 +1,4 @@
-//checkForEmpty will export function isEmpty() which will take field parameter
+//checkForEmpty will export function isEmpty() which will take field parameter and checks  whether it is empty or not
 
 const ifEmpty = field => {
     try {
