@@ -12,4 +12,4 @@ const database = knex({
     }
 });
 
-module.exports = database;
+module.exports = database; //Every time you need a connection to your database you can import this file
