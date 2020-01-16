@@ -2,7 +2,8 @@ const Validator = require('validator');
 const ifEmpty = require('./checkForEmpty.js');
 
 //will exports an function checkRegistrationFields() 
-
+//‘register.js’ uses validator and the ‘ifEmpty’ function 
+// to ensure that all the entries entered by the user while registering are valid.
 module.exports = function checkRegistrationFields(data) {
     //An error object to return all field errors
     let errors = {};
