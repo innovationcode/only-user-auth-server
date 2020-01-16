@@ -30,6 +30,35 @@ router.post('/register', (req, res) => {
         return token;
     });
     
-})
+    //With a salt factor of 12 we hash the users password with bcrypt so that we don't just store it as plain text in the database.
+    //adding users email, password, registration date, token, the date the token to users table
+    bcrypt.genSalt(12, (err, salt) => {
+        if(err) throw err;
+        bcrypt.hash(req.body.password1, salt, (err, hash) => {
+            if(err) throw err;
+
+            usersDb("users").returning(["id", "email", "registered", "token"])
+                            .insert({ email: req.body.email,
+                                      password: hash,
+                                      registered: Date.now(),
+                                      token: token,
+                                      createdtime: Date.now(),
+                                      emailverified: "f",
+                                      tokenusedbefore: "f"
+                             })
+                            .then(user => {
+                                    // This is where the api returns json to the /register route
+                                    // Return the id, email, registered on date and token here
+                                    // Sending the user's token as a response here is insecure,
+                                    // but it is useful to check if our code is working properly
+                                    res.json(user[0]);
+                             })
+                            .catch(err => {
+                                errors.account = "Email already registered";
+                                res.status(400).json(errors)
+                            });
+        }) //bcrypt hash ends
+    })//bcrypt salt generation ends
+})//register route ends
 
 module.exports = router;
