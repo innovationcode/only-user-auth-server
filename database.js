@@ -12,4 +12,8 @@ const database = knex({
     }
 });
 
+if(!database) {
+    console.log("DATABASE CONNECTING ERROR");
+}
+
 module.exports = database; //Every time you need a connection to your database you can import this file
