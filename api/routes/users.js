@@ -59,4 +59,6 @@ router.post("/register", (req, res) => {
     }); // bcrypt salt function ends
 }); // register route ends
 
+//
+
 module.exports = router;
