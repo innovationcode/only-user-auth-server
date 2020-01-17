@@ -5,6 +5,8 @@ const usersDb = require("../../database");
 
 //For Validation of data while registering and login
 const checkRegistrationFields = require('../../validation/register.js');
+// SendEmail from Utilities
+const sendEmail = require("../../utilities/sendEmail");
 
 //to check user route 
 router.get('/', (req, res) => {
@@ -44,11 +46,19 @@ router.post("/register", (req, res) => {
                                           tokenusedbefore: "f"
                                  })
                                 .then(user => {
-                                    // This is where the api returns json to the /register route
-                                    // Return the id, email, registered on date and token here
-                                    // Sending the user's token as a response here is insecure,
-                                    // but it is useful to check if our code is working properly
-                                    res.json(user[0]);
+                                            let to = [user[0].email]; //Email address must be an array
+
+                                            // When you set up your front-end you can create a working verification link here
+                                            let link = "yourWebsite/users/verify.." + user[0].token;
+                                            //Sunbject of your email
+                                            let sub = "Confirm Registartion";
+
+                                            //content as HTML
+                                            let content = "<body><p>Please verify your email.</p><a href = "+ link + ">Verify email</a></body>";
+
+                                            //use the Email function from utilities ...
+                                            sendEmail.Email(to, sub, content);
+                                            res.json("Success!")
                                  })
                                 .catch(err => {
                                     console.log(err);
