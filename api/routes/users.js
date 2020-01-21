@@ -46,10 +46,10 @@ router.post("/register", (req, res) => {
                                           tokenusedbefore: "f"
                                  })
                                 .then(user => {
-                                            let to = [user[0].email]; //Email address must be an array
-
+                                            let to = [user[0].email] //Email address must be an array
+                                            
                                             // When you set up your front-end you can create a working verification link here
-                                            let link = "yourWebsite/users/verify.." + user[0].token;
+                                            let link = "https://yourWebsite/v1/users/verify/" + user[0].token;
                                             //Sunbject of your email
                                             let sub = "Confirm Registartion";
 
@@ -69,6 +69,33 @@ router.post("/register", (req, res) => {
     }); // bcrypt salt function ends
 }); // register route ends
 
-//
+//Token verification route
+router.post('/verify/:token', (req, res) => {
+    const {token} = req.params;
+    const errors = {};
+    usersDb.returning(['email', 'emailverified', 'tokenusedbefore'])
+           .from('users')
+           .where({token : token, tokenusedbefore: 'f'})
+           .update({emailverified: 't', tokenusedbefore: 't'})
+           .then(data => {
+                 if( data.length > 0){
+                     res.json("Email vrified Please login to access your account.");
+                 }
+                 else {
+                     usersDb.select('email', 'emailverified', 'tokenusedbefore')
+                            .from('users')
+                            .where('token', token)
+                            .then(check => {
+                                if(check.length > 0){
+                                    if (check[0].emailverified) {
+                                        errors.alreadyVerified = "Email already verified. Please login to your account.";
+                                        res.status(400).json(errors);
+                                    }
+                                }
+                            })
+                 }
+           })
+
+})
 
 module.exports = router;
