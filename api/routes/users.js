@@ -46,20 +46,19 @@ router.post("/register", (req, res) => {
                                           tokenusedbefore: "f"
                                  })
                                 .then(user => {
-                                            let to = [user[0].email] //Email address must be an array
+                                            // let to = [user[0].email] //Email address must be an array
                                             
-                                            // When you set up your front-end you can create a working verification link here
-                                            let link = "https://yourWebsite/v1/users/verify/" + user[0].token;
-                                            //Sunbject of your email
-                                            let sub = "Confirm Registartion";
+                                            // // When you set up your front-end you can create a working verification link here
+                                            // let link = "https://yourWebsite/v1/users/verify/" + user[0].token;
+                                            // //Sunbject of your email
+                                            // let sub = "Confirm Registartion";
 
-                                            //content as HTML
-                                            let content = "<body><p>Please verify your email.</p><a href = "+ link + ">Verify email</a></body>";
+                                            // //content as HTML
+                                            // let content = "<body><p>Please verify your email.</p><a href = "+ link + ">Verify email</a></body>";
 
-                                            //use the Email function from utilities ...
-                                            sendEmail.Email(to, sub, content);
-                                            res.json("Success!")
-                                 })
+                                            // //use the Email function from utilities ...
+                                            // sendEmail.Email(to, sub, content);
+                                            res.json(token)                                 })
                                 .catch(err => {
                                     console.log(err);
                                     errors.account = "Email already registered";
@@ -81,6 +80,8 @@ router.post('/verify/:token', (req, res) => {
                  if( data.length > 0){
                      res.json("Email vrified Please login to access your account.");
                  }
+                 //If the above query comes back empty, check the database again to see if the token exists and if 'emailverified' is true. 
+                 // send a message stating 'Email already verified
                  else {
                      usersDb.select('email', 'emailverified', 'tokenusedbefore')
                             .from('users')
@@ -91,11 +92,25 @@ router.post('/verify/:token', (req, res) => {
                                         errors.alreadyVerified = "Email already verified. Please login to your account.";
                                         res.status(400).json(errors);
                                     }
+                                } 
+                                //If token is absent there could be two possibilities, the user did not register or the token has expired
+                                else {
+                                    errors.email_invalid = "Enail invalid. Please check if you have registered with the correct email address or re-send the verification link to your email";
+                                    res.status(400).json(errors);
                                 }
-                            })
+                             })
+                            .catch(err => {
+                                errors.db = "Bad request";
+                                res.status(400).json(errors);
+                             });
                  }
-           })
+             })
+            .catch(err => {
+                errors.db = "Bad request";
+                res.status(400).json(errors);
+            });
+});
 
-})
+
 
 module.exports = router;
