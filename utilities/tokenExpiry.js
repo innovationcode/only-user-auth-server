@@ -1,4 +1,6 @@
 //Creating tokens that never expire and sending them out over the internet is not very good for security
+//If an hour has passed after a user has registered through the API.
+//If so, the token issued to the user at the time of registration is deleted from the database.
 const usersdb = require('../database.js');
 
 // With setInterval() Function runs every 4 seconds
