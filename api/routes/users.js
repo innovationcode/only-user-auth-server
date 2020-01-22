@@ -13,6 +13,8 @@ const checkResendField = require("../../validation/resend");
 
 //for login route ..
 const jwt = require("jsonwebtoken");
+//login validation
+const validateLoginInput = require('../../validation/login.js')
 
 
 //to check user route 
@@ -171,6 +173,36 @@ router.post('/resend_email', (req, res) => {
             errors.db = "Bad request";
             res.status(400).json(errors);
          })
+})
+
+//login route
+router.post('/login', (req, res) => {
+    //Ensure all data provided by user  is valid
+    const { errors, isValid } = validateLoginInput(req.body);
+
+    if(!isValid) {
+         return res.status(400).json(errors);
+    } else {
+         usersDb.select('id', 'email', 'password')
+                .where('email', '=', req.body.email)
+                .andWhere('emailverified', true)
+                .from('users')
+                .then(data => {
+                    bcrypt.compare(req.body.password, data[0].password).then(isMatch => {
+                        if (isMatch) {
+                            const payload = { id: data[0].id, email: data[0].email };
+                            jwt.sign(payload, process.env.SECRET_KEY_FOR_JASONWEBTOKEN, { expiresIn: 3600 }, (err, token) => {
+                                res.status(200).json("Bearer " + token)
+                            })
+                        } else {
+                            res.status(400).json("Bad request")
+                        }
+                    })
+                 })
+                .catch(err => {
+                    res.status(400).json("Bad request")
+                 })
+    }
 })
 
 module.exports = router;
