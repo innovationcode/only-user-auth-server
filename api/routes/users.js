@@ -16,6 +16,9 @@ const jwt = require("jsonwebtoken");
 //login validation
 const validateLoginInput = require('../../validation/login.js')
 
+// Forgot password validation
+const validateResetInput = require("../../validation/checkEmail.js");
+
 
 //to check user route 
 router.get('/', (req, res) => {
@@ -209,5 +212,61 @@ router.post('/login', (req, res) => {
                  })
     }
 })
+
+//forget password route
+router.post("/forgot-password", function(req, res) {
+    const {errors, isValid } = validateResetInput(req.body);
+  
+    if (!isValid) {
+        return res.status(400).json(errors);
+    }
+
+    let resetToken;
+    crypto.randomBytes(48, (err, buf) => {
+        if (err) throw err;
+        resetToken = buf.toString("hex");
+        return resetToken;
+    });
+
+    usersDb.table("users")
+           .select("*")
+           .where("email", req.body.email)
+           .then(emailData => {
+                if (emailData.length == 0) {
+                    res.status(400).json("Invalid email address");
+                } else {
+                    usersDb.table("users")
+                           .where("email", emailData[0].email)
+                           .update({
+                                    reset_password_token: resetToken,
+                                    reset_password_expires: Date.now(),
+                                    reset_password_token_used: false
+                            }) 
+                            .then(done => {
+                                let to = [req.body.email];
+                    
+                                let link = "https://yourWebsite/v1/users/verify/" + resetToken;
+                    
+                                let sub = "Reset Password";
+                    
+                                let content = "<body><p>Please reset your password.</p> <a href=" +
+                                               link +
+                                               ">Reset Password</a></body>";
+                                
+                                //Passing the details of the email to a function allows us to generalize the email sending function
+                                sendEmail.Email(to, sub, content);
+                    
+                                res.status(200).json("Please check your email for the reset password link");
+                             })
+                            .catch(err => {
+                                res.status(400).json("Bad Request");
+                             });
+                } //else end
+             })
+            .catch(err => {
+                res.status(400).json("Bad Request");
+             });
+});
+                       
 
 module.exports = router;
