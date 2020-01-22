@@ -18,6 +18,8 @@ const validateLoginInput = require('../../validation/login.js')
 
 // Forgot password validation
 const validateResetInput = require("../../validation/checkEmail.js");
+// Validate new password
+const validatePasswordChange = require("../../validation/newPassword");
 
 
 //to check user route 
@@ -268,5 +270,44 @@ router.post("/forgot-password", function(req, res) {
              });
 });
                        
+//reset_password route
+router.post("/reset_password/:token", function(req, res) {
+    const { token } = req.params;
+    usersDb.select(["id", "email"])
+           .from("users")
+           .where({ reset_password_token: token, reset_password_token_used: false })
+           .then(data => {
+                if (data.length > 0) {
+                    const { errors, isValid } = validatePasswordChange(req.body);
+  
+                    if (!isValid) {
+                            return res.status(400).json(errors);
+                    }
+  
+                    bcrypt.genSalt(12, (err, salt) => {
+                        if (err) throw err;
+                        bcrypt.hash(req.body.password, salt, (err, hash) => {
+                            if (err) throw err;
+                            usersDb("users").returning("email")
+                                            .where({ id: data[0].id, email: data[0].email })
+                                            .update({ password: hash, reset_password_token_used: true })
+                                            .then(user => {
+                                                const subject = "Password change for your account.";
+                                                const txt = `The password for your account registered under ${user[0]} has been successfully changed.`;
+    
+                                                sendEmail.Email(to, subject, txt);
+                                                res.json("Password successfully changed for " + user[0] + "!");
+                                            })
+                                            .catch(err => {
+                                                res.status(400).json(errors);
+                                            });
+                        });
+                    });
+                } else {
+                        res.status(400).json("Password reset error!");
+                }
+            })
+            .catch(err => res.status(400).json("Bad request"));
+  });
 
 module.exports = router;
