@@ -60,19 +60,19 @@ router.post("/register", (req, res) => {
                                           tokenusedbefore: "f"
                                  })
                                 .then(user => {
-                                            // let to = [user[0].email] //Email address must be an array
+                                            let to = [user[0].email] //Email address must be an array
                                             
-                                            // // When you set up your front-end you can create a working verification link here
-                                            // let link = "https://yourWebsite/v1/users/verify/" + user[0].token;
-                                            // //Sunbject of your email
-                                            // let sub = "Confirm Registartion";
+                                            // When you set up your front-end you can create a working verification link here
+                                            let link = "https://yourWebsite/v1/users/verify/" + user[0].token;
+                                            //Sunbject of your email
+                                            let sub = "Confirm Registartion";
 
-                                            // //content as HTML
-                                            // let content = "<body><p>Please verify your email.</p><a href = "+ link + ">Verify email</a></body>";
+                                            //content as HTML
+                                            let content = "<body><p>Please verify your email.</p><a href = "+ link + ">Verify email</a></body>";
 
-                                            // //use the Email function from utilities ...
-                                            // sendEmail.Email(to, sub, content);
-                                            res.json(token)                                 })
+                                            //use the Email function from utilities ...
+                                            sendEmail.Email(to, sub, content);
+                                            res.json("Email sent")                                 })
                                 .catch(err => {
                                     console.log(err);
                                     errors.account = "Email already registered";
