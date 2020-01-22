@@ -129,6 +129,45 @@ router.post('/resend_email', (req, res) => {
         resendToken = buf.toString("base64").replace(/\//g, "").replace(/\+/g, '-');
         return resendToken;
     });
+
+    usersDb.table('users')
+        .select('*')
+        .where({email : req.body.email})
+        .then(data => {
+            if(data,length == 0){
+                errors.invalid = "Invalid email address. Please register again!";
+                res.status(400).json(errors);
+            } else {
+                usersDb.table("users")
+                       .returning(["email", "token"])
+                       .where({ email: data[0].email, emailverified: "false" })
+                       .update({ token: resendToken, createdtime: Date.now() })
+                       .then(result => {
+                                if (result.length) {
+                                    let to = [result[0].email];
+
+                                    let link ="https://yourWebsite/v1/users/verify/" + result[0].token;
+                                    let sub = "Confirm Registration";
+                                    let content = "<body><p>Please verify your email.</p> <a href=" + link + ">Verify email</a></body>";
+              
+                                    sendEmail.Email(to, sub, content);
+
+                                    res.json("Email re-sent!");
+                                } else {
+                                        errors.alreadyVerified = "Email address has already been verified, please login.";
+                                        res.status(400).json(errors);
+                                }
+                         })
+                       .catch(err => {
+                            errors.db = "Bad request";
+                            res.status(400).json(errors);
+                         });
+            }
+        })
+        .catch(err => {
+            errors.db = "Bad request";
+            res.status(400).json(errors);
+         })
 })
 
 module.exports = router;
