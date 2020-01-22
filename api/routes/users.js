@@ -8,6 +8,10 @@ const checkRegistrationFields = require('../../validation/register.js');
 // SendEmail from Utilities
 const sendEmail = require("../../utilities/sendEmail");
 
+// Resend email validaiton
+const checkResendField = require("../../validation/resend");
+
+
 //to check user route 
 router.get('/', (req, res) => {
     res.send("Users Route  👏");
@@ -111,6 +115,20 @@ router.post('/verify/:token', (req, res) => {
             });
 });
 
+//resend_email route... and create token again
+router.post('/resend_email', (req, res) => {
+    const { errors, isValid } = checkResendField(req.body);
+    if(!isValid) {
+        return res.status(400).json(errors);
+    }
 
+    let resendToken;
+    crypto.randomBytes(48, (err, buf) => {
+        if(err) throw err;
+
+        resendToken = buf.toString("base64").replace(/\//g, "").replace(/\+/g, '-');
+        return resendToken;
+    });
+})
 
 module.exports = router;
