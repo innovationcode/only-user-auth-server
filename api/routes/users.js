@@ -179,8 +179,13 @@ router.post('/resend_email', (req, res) => {
 router.post('/login', (req, res) => {
     //Ensure all data provided by user  is valid
     const { errors, isValid } = validateLoginInput(req.body);
+    console.log(req.body)
+    console.log(errors)
+    console.log(isValid)
 
-    if(!isValid) {
+
+    if(isValid === true) {
+         console.log("VALID  ..&&")
          return res.status(400).json(errors);
     } else {
          usersDb.select('id', 'email', 'password')
