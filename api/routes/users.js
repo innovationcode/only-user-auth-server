@@ -11,6 +11,9 @@ const sendEmail = require("../../utilities/sendEmail");
 // Resend email validaiton
 const checkResendField = require("../../validation/resend");
 
+//for login route ..
+const jwt = require("jsonwebtoken");
+
 
 //to check user route 
 router.get('/', (req, res) => {
